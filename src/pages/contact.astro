@@ -1,0 +1,156 @@
+---
+import DefaultLayout from "../layouts/DefaultLayout.astro";
+---
+
+<DefaultLayout>
+    <div class="flex justify-center items-center min-h-screen bg-gray-950 px-4">
+      <form id="contact-form" class="bg-gray-900 p-8 rounded-2xl shadow-xl max-w-lg w-full text-white border border-gray-800 relative">
+        <img src="/assets/contact.png" alt="Contáctanos" class="absolute -top-20 left-1/2 transform -translate-x-1/2 w-28 h-auto rounded-full border-4 border-gray-800 shadow-lg" />
+        
+        <h2 class="text-3xl font-bold text-center mb-6 mt-10 text-green-400">Contáctanos</h2>
+        
+        <div class="mb-4">
+          <label class="block text-gray-300 text-sm font-semibold mb-1">Nombre</label>
+          <input 
+            type="text" 
+            id="name" 
+            class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition" 
+            placeholder="Tu nombre" 
+            required 
+          />
+        </div>
+      
+        <div class="mb-4">
+          <label class="block text-gray-300 text-sm font-semibold mb-1">Correo Electrónico</label>
+          <input 
+            type="email" 
+            id="email" 
+            class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition" 
+            placeholder="tucorreo@ejemplo.com" 
+            required 
+          />
+        </div>
+      
+        <div class="mb-4">
+          <label class="block text-gray-300 text-sm font-semibold mb-1">Mensaje</label>
+          <textarea 
+            id="message" 
+            class="w-full p-3 rounded-lg bg-gray-800 border border-gray-700 focus:outline-none focus:ring-2 focus:ring-green-500 transition resize-none" 
+            rows="4" 
+            placeholder="Escribe tu mensaje" 
+            required
+          ></textarea>
+        </div>
+      
+        <button 
+          type="submit" 
+          id="submit-btn"
+          class="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded-xl transition duration-300 transform active:scale-95 shadow-md hover:shadow-lg flex items-center justify-center gap-2"
+        >
+          <span id="submit-text">Enviar Mensaje</span>
+          <div id="loading-spinner" class="hidden w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+        </button>
+  
+        <p id="success-msg" class="hidden text-green-400 text-center mt-4 font-medium">✅ ¡Mensaje enviado con éxito!</p>
+        <p id="error-msg" class="hidden text-red-400 text-center mt-4 animate-pulse font-medium">❌ Error al enviar el mensaje. Intenta nuevamente.</p>
+      </form>
+    </div>
+</DefaultLayout>
+
+<script>
+  import { createSignal } from "solid-js";
+  import { sendMessage } from "../services/messagesservice";
+
+  const [loading, setLoading] = createSignal(false);
+
+  const contactForm = document.getElementById("contact-form");
+  if (contactForm) {
+    contactForm.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      if (loading()) return;
+
+      setLoading(true);
+      const submitBtn = document.getElementById("submit-btn") as HTMLButtonElement;
+      const submitText = document.getElementById("submit-text");
+      const loadingSpinner = document.getElementById("loading-spinner");
+
+      if (submitBtn) {
+        submitBtn.classList.add("bg-gray-500", "cursor-not-allowed");
+        submitBtn.disabled = true;
+      }
+      if (submitText) {
+        submitText.classList.add("hidden");
+      }
+      if (loadingSpinner) {
+        loadingSpinner.classList.remove("hidden");
+      }
+
+      const nameElement = document.getElementById("name");
+      const name = nameElement ? (nameElement as HTMLInputElement).value.trim() : "";
+      const emailElement = document.getElementById("email");
+      const email = emailElement ? (emailElement as HTMLInputElement).value.trim() : "";
+      const messageElement = document.getElementById("message");
+      const message = messageElement ? (messageElement as HTMLTextAreaElement).value.trim() : "";
+
+      if (!name || !email || !message) {
+        showError("Todos los campos son obligatorios.");
+        return;
+      }
+
+      try {
+        await sendMessage({ name, email, message });
+        showSuccess();
+        const nameInput = document.getElementById("name") as HTMLInputElement;
+        if (nameInput) {
+          nameInput.value = "";
+        }
+        const emailInput = document.getElementById("email") as HTMLInputElement;
+        if (emailInput) {
+          emailInput.value = "";
+        }
+        const messageInput = document.getElementById("message") as HTMLTextAreaElement;
+        if (messageInput) {
+          messageInput.value = "";
+        }
+      } catch {
+        showError("Hubo un problema al enviar el mensaje. Intenta nuevamente.");
+      } finally {
+        setLoading(false);
+        if (submitBtn) {
+          submitBtn.classList.remove("bg-gray-500", "cursor-not-allowed");
+          submitBtn.disabled = false;
+        }
+        if (submitText) {
+          submitText.classList.remove("hidden");
+        }
+        if (loadingSpinner) {
+          loadingSpinner.classList.add("hidden");
+        }
+      }
+    });
+  }
+
+  function showSuccess() {
+    const successMsgElement = document.getElementById("success-msg");
+    if (successMsgElement) {
+      successMsgElement.classList.remove("hidden");
+    }
+    const errorMsgElement = document.getElementById("error-msg");
+    if (errorMsgElement) {
+      errorMsgElement.classList.add("hidden");
+    }
+  }
+
+  function showError(message:string) {
+    const errorMsgElement = document.getElementById("error-msg");
+    if (errorMsgElement) {
+      errorMsgElement.textContent = `❌ ${message}`;
+      errorMsgElement.classList.remove("hidden");
+    }
+    const successMsgElement = document.getElementById("success-msg");
+    if (successMsgElement) {
+      successMsgElement.classList.add("hidden");
+    }
+    setLoading(false);
+  }
+</script>

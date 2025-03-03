@@ -1,0 +1,130 @@
+---
+import { LayoutDashboard, FolderOpen, BookOpen, Share2, MessageSquare, Settings, LogOut, ShieldCheck, PanelRightClose } from "lucide-react";
+const { title } = Astro.props;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{title ? `${title} | Admin` : 'Panel de Administración'}</title>
+    <style>
+      /* Fuente principal */
+      body {
+        font-family: 'Inter', sans-serif;
+      }
+
+      /* Iconos */
+      .icon {
+        width: 26px;
+        height: 26px;
+        color: white;
+        opacity: 0.8;
+        transition: opacity 0.3s ease-in-out;
+      }
+
+      .menu-item:hover .icon {
+        opacity: 1;
+      }
+
+      /* Links del menú */
+      .menu-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 10px 16px;
+        border-radius: 8px;
+        transition: all 0.3s ease-in-out;
+      }
+
+      .menu-item:hover {
+        background-color: rgba(255, 255, 255, 0.1);
+      }
+
+      /* Botón de cerrar sesión */
+      .logout-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        padding: 12px 16px;
+        border-radius: 8px;
+        background-color: #dc2626;
+        color: white;
+        transition: background-color 0.3s ease-in-out, transform 0.2s ease-in-out;
+      }
+
+      .logout-btn:hover {
+        background-color: #b91c1c;
+        transform: scale(1.05);
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 text-gray-900">
+
+    <div class="flex h-screen">
+      <!-- Sidebar Mejorado -->
+      <aside class="w-64 bg-gradient-to-b from-gray-800 to-gray-900 text-white p-4 flex flex-col rounded-r-2xl shadow-lg">
+        <h2 class="text-xl font-bold flex items-center gap-2 mb-4">
+          <ShieldCheck className="icon" />
+          Panel de Administración
+        </h2>
+        <nav class="mt-2 flex-1">
+          <ul class="space-y-2">
+            <li>
+              <a href="/admin/DashboardManager" class="menu-item">
+                <LayoutDashboard className="icon" />
+                Dashboard
+              </a>
+            </li>
+            <li>
+              <a href="/admin/ProjectManager" class="menu-item">
+                <FolderOpen className="icon" />
+                Proyectos
+              </a>
+            </li>
+            <li>
+              <a href="/admin/BlogManager" class="menu-item">
+                <BookOpen className="icon" />
+                Blog
+              </a>
+            </li>
+            <li>
+              <a href="/admin/SocialLinksManager" class="menu-item">
+                <Share2 className="icon" />
+                Redes Sociales
+              </a>
+            </li>
+            <li>
+              <a href="/admin/CommentsManager" class="menu-item">
+                <MessageSquare className="icon" />
+                Mensajes
+              </a>
+            </li>
+            <li>
+              <a href="/admin/admin" class="menu-item">
+                <Settings className="icon" />
+                Panel Admin
+              </a>
+            </li>
+          </ul>
+        </nav>
+        <!-- Botón Logout Mejorado -->
+        <button class="logout-btn">
+          <LogOut className="icon" />
+          Cerrar sesión
+        </button>
+      </aside>
+      <!-- Contenido Principal Mejorado -->
+      <main class="flex-1 p-6 bg-white shadow-md rounded-l-2xl">
+        <header class="mb-4 border-b pb-2 flex justify-between items-center">
+          <h1 class="text-2xl font-semibold flex items-center gap-2">
+            <PanelRightClose className="icon" />
+            {title}
+          </h1>
+        </header>
+        <slot />
+      </main>
+    </div>
+  </body>
+</html>

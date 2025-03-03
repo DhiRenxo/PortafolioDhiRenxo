@@ -1,0 +1,133 @@
+---
+import DefaultLayout from "../layouts/DefaultLayout.astro";
+import { getProjects } from "../services/projectsservice";
+import type { Project } from "../types/projecttypes";
+
+const allProjects: Project[] = await getProjects();
+
+const projectsPerPage = 6;
+
+---
+
+<DefaultLayout>
+  <section class="p-6 text-center">
+    <h1 class="text-4xl font-bold text-green-400">Mis Proyectos</h1>
+    <p class="text-gray-400 text-lg mt-2">Explora algunos de los proyectos en los que he trabajado.</p>
+
+    <!-- Círculo de carga -->
+    <div id="loading-spinner" class="flex justify-center mt-6">
+      <div class="w-12 h-12 border-4 border-green-400 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+
+    <!-- Contenedor de Proyectos -->
+    <div id="projects-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mt-8 hidden" 
+      data-projects={`${JSON.stringify(allProjects)}`}>
+    </div>
+
+    <!-- Controles de Paginación -->
+    <div id="pagination-controls" class="mt-8 flex justify-center gap-4 hidden">
+      <button id="prevPage" class="px-4 py-2 bg-gray-700 text-white rounded-lg disabled:opacity-50">⬅️ Anterior</button>
+      <span id="pageInfo" class="text-gray-300 text-lg"></span>
+      <button id="nextPage" class="px-4 py-2 bg-gray-700 text-white rounded-lg disabled:opacity-50">Siguiente ➡️</button>
+    </div>
+  </section>
+
+  <script>
+    import { getProjects } from "../services/projectsservice";
+    import type { Project } from "../types/projecttypes";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const projectsContainer = document.getElementById("projects-container");
+      const prevButton = document.getElementById("prevPage");
+      const nextButton = document.getElementById("nextPage");
+      const pageInfo = document.getElementById("pageInfo");
+      const paginationControls = document.getElementById("pagination-controls");
+      const loadingSpinner = document.getElementById("loading-spinner");
+
+      let currentPage = 1;
+      const projectsPerPage = 6;
+
+      try {
+        // Llamamos a la API para obtener los proyectos
+        const projects = await getProjects();
+        const totalPages = Math.ceil(projects.length / projectsPerPage);
+
+        function renderProjects() {
+          if (projectsContainer) {
+            projectsContainer.innerHTML = "";
+          }
+          const start = (currentPage - 1) * projectsPerPage;
+          const paginatedProjects = projects.slice(start, start + projectsPerPage);
+
+          paginatedProjects.forEach((project) => {
+            const projectCard = document.createElement("div");
+            projectCard.className = "bg-gray-900 p-6 rounded-xl shadow-lg border border-gray-800 transition-transform transform hover:scale-105";
+            projectCard.innerHTML = `
+              <img src="${project.image_url}" alt="${project.title}" class="w-full h-48 object-cover rounded-lg mb-4" />
+              <h2 class="text-xl font-semibold text-white">${project.title}</h2>
+              <p class="text-gray-400 mt-2">${project.description}</p>
+              <div class="mt-4 flex gap-2 flex-wrap">
+                ${project.tech_stack.map(tech => `<span class="px-3 py-1 text-sm bg-green-500 text-white rounded-full">${tech}</span>`).join("")}
+              </div>
+              <div class="mt-4 flex justify-between">
+                <a href="${project.repo_url}" target="_blank" class="text-blue-400 hover:underline">Repo</a>
+                <a href="${project.demo_url}" target="_blank" class="text-green-400 hover:underline">Demo</a>
+              </div>
+            `;
+            if (projectsContainer) {
+              projectsContainer.appendChild(projectCard);
+            }
+          });
+
+          if (pageInfo) {
+            pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+          }
+          if (prevButton) {
+            (prevButton as HTMLButtonElement).disabled = currentPage === 1;
+          }
+          if (nextButton) {
+            (nextButton as HTMLButtonElement).disabled = currentPage === totalPages;
+          }
+        }
+
+        if (prevButton) {
+          prevButton.addEventListener("click", () => {
+            if (currentPage > 1) {
+              currentPage--;
+              renderProjects();
+            }
+          });
+        }
+
+        if (nextButton) {
+          nextButton.addEventListener("click", () => {
+            if (currentPage < totalPages) {
+              currentPage++;
+              renderProjects();
+            }
+          });
+        }
+
+        // Ocultar spinner y mostrar proyectos después de cargar los datos
+        setTimeout(() => {
+          if (loadingSpinner) {
+            loadingSpinner.style.display = "none";
+          }
+          if (projectsContainer) {
+            projectsContainer.classList.remove("hidden");
+          }
+          if (paginationControls) {
+            paginationControls.classList.remove("hidden");
+          }
+          renderProjects();
+        }, 1500);
+      } catch (error) {
+        console.error("Error al obtener los proyectos:", error);
+        if (loadingSpinner) {
+          loadingSpinner.style.display = "none";
+        }
+      }
+    });
+</script>
+
+</DefaultLayout>

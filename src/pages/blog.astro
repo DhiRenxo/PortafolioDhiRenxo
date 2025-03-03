@@ -1,0 +1,66 @@
+---
+import DefaultLayout from "../layouts/DefaultLayout.astro";
+---
+
+<DefaultLayout>
+  <!-- Sección en construcción -->
+  <section class="relative flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white text-center overflow-hidden">
+    <h1 class="text-4xl font-bold text-green-400">Página en Construcción</h1>
+    <p class="text-lg text-gray-300 mt-4">Estamos trabajando en esta sección. ¡Vuelve pronto!</p>
+
+    <!-- Subtítulo de carga con puntos animados -->
+    <h2 class="text-lg text-white mt-4">Cargando<span id="dots">...</span></h2>
+
+    <!-- Barra de recarga con error -->
+    <div class="w-full bg-gray-700 h-2 mt-3 rounded overflow-hidden">
+        <div id="progress-bar" class="bg-green-400 h-2 rounded transition-all duration-500" style="width: 0%;"></div>
+    </div>
+
+    <!-- Imagen fija debajo de la barra -->
+    <div class="mt-6 w-48 h-auto">
+      <img src="/assets/construction.png" alt="En construcción" class="w-full h-auto" loading="lazy" />
+    </div>
+  </section>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const progressBar = document.getElementById("progress-bar");
+      const dots = document.getElementById("dots");
+      let width = 0;
+      let dotCount = 0;
+
+      function fillProgressBar() {
+        if (width >= 90) {  // ERROR: La barra nunca llega al 100%
+          width = Math.random() * 30; // Reinicia la barra en un punto aleatorio
+        } else {
+          width += Math.random() * 10; // Aumento aleatorio
+        }
+
+        if (progressBar) {
+          progressBar.style.width = width + "%";
+        }
+
+        // ERROR: Cambia a rojo después del 50%
+        if (progressBar) {
+          if (width > 50) {
+            progressBar.classList.remove("bg-green-400");
+            progressBar.classList.add("bg-red-500");
+          } else {
+            progressBar.classList.remove("bg-red-500");
+            progressBar.classList.add("bg-green-400");
+          }
+        }
+      }
+
+      function animateDots() {
+        dotCount = (dotCount + 1) % 4;
+        if (dots) {
+          dots.innerText = ".".repeat(dotCount) + " ".repeat(3 - dotCount);
+        }
+      }
+
+      setInterval(fillProgressBar, 500); // Actualiza cada 0.5 segundos
+      setInterval(animateDots, 500); // Anima los puntos
+    });
+  </script>
+</DefaultLayout>

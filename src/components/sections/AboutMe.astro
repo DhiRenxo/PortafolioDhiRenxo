@@ -1,0 +1,63 @@
+---
+const aboutText = `
+  Soy un apasionado desarrollador fullstack con experiencia en tecnologías modernas como Astro, Vue, Node.js y PostgreSQL. Me encanta crear aplicaciones rápidas, optimizadas y escalables.
+`;
+
+const skills = [
+  { name: "Astro", icon: "logos:astro" },
+  { name: "Vue.js", icon: "logos:vue" },
+  { name: "Node.js", icon: "logos:nodejs-icon" },
+  { name: "PostgreSQL", icon: "logos:postgresql" },
+  { name: "TailwindCSS", icon: "logos:tailwindcss-icon" }
+];
+---
+
+<style>
+  .fade-in {
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeInUp 1s ease-out forwards;
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .card {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 1.5rem;
+    border-radius: 10px;
+    text-align: center;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  }
+
+  .card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0 15px rgba(34, 197, 94, 0.5);
+  }
+</style>
+
+<section class="relative bg-gray-900 text-white py-20">
+  <div class="max-w-7xl mx-auto px-6 text-center fade-in">
+    <h2 class="text-4xl font-bold mb-6">Sobre Mí</h2>
+    <p class="text-lg text-gray-300 max-w-3xl mx-auto">{aboutText}</p>
+
+    <!-- Habilidades -->
+    <div class="mt-10 grid grid-cols-2 md:grid-cols-5 gap-6">
+      {skills.map((skill) => (
+        <div class="card flex flex-col items-center p-4">
+          <iconify-icon icon={skill.icon} class="text-5xl text-green-400"></iconify-icon>
+          <span class="mt-2 text-lg font-semibold">{skill.name}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+</section>

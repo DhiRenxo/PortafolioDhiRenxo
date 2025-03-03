@@ -1,0 +1,64 @@
+---
+import Button from "../../components/ui/Button.astro";
+
+const links = [
+  { name: "Inicio", href: "/" },
+  { name: "Sobre mi", href: "/about" },
+  { name: "Proyectos", href: "/projects" },
+  { name: "Contacto", href: "/contact" },
+  { name: "Blog", href: "/blog" },
+  { name: "Comentanos", href: "/comment" }
+
+];
+---
+
+<nav class="w-full bg-black text-white shadow-md fixed top-0 left-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+    <a href="/" class="text-2xl font-bold text-green-400">PortafolioDhiRenxo</a>
+    
+    <!-- Menú Desktop -->
+    <ul class="hidden md:flex space-x-6">
+      {links.map((link) => (
+        <li>
+          <a href={link.href} class="hover:text-green-400 transition">{link.name}</a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- Botón Descargar CV (Escritorio) -->
+    <div class="hidden md:block">
+      <a href="/docs/Meza Iriarte Chayanne - CV.pdf" download class="ml-4 bg-green-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-green-500 transition">
+        Descargar CV
+      </a>
+    </div>
+
+    <!-- Botón Menú Móvil -->
+    <button class="md:hidden p-2 text-green-400 focus:outline-none" id="menu-toggle">
+      ☰
+    </button>
+    </div>
+
+    <!-- Menú Móvil -->
+    <div class="hidden md:hidden flex flex-col items-center bg-black text-white py-4" id="mobile-menu">
+      {links.map((link) => (
+        <a href={link.href} class="py-2">{link.name}</a>
+      ))}
+      <a href="/docs/Meza Iriarte Chayanne - CV.pdf" download class="mt-2 bg-green-400 text-black px-4 py-2 rounded-lg font-semibold hover:bg-green-500 transition">
+        Descargar CV
+      </a>
+    </div>
+
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const menuToggle = document.getElementById("menu-toggle");
+      const mobileMenu = document.getElementById("mobile-menu");
+
+      if (menuToggle && mobileMenu) {
+        menuToggle.addEventListener("click", () => {
+          mobileMenu.classList.toggle("hidden");
+        });
+      }
+    });
+  </script>
+</nav>

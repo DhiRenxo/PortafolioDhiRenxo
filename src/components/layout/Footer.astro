@@ -1,0 +1,59 @@
+---
+import { Github, Linkedin, Twitter } from "lucide-react";
+
+const year = new Date().getFullYear();
+
+const navLinks = [
+  { name: "Inicio", href: "/" },
+  { name: "Sobre mí", href: "/about" },
+  { name: "Proyectos", href: "/projects" },
+  { name: "Contacto", href: "/contact" },
+  { name: "Blog", href: "/blog" }
+];
+
+const socialLinks = [
+  { name: "GitHub", href: "https://github.com/Dhirenxo", icon: Github },
+  { name: "LinkedIn", href: "https://www.linkedin.com/in/chayanne-meza-iriarte-1076a4173/", icon: Linkedin },
+  { name: "Twitter", href: "https://x.com/DhiRenxo", icon: Twitter }
+];
+---
+
+<footer class="bg-black text-white py-8">
+  <div class="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-between items-center">
+    <!-- Logo -->
+    <div class="mb-6 md:mb-0">
+      <a href="/" class="text-2xl font-bold text-green-400">
+        PortafolioDhiRenxo
+      </a>
+    </div>
+
+    <!-- Menú de navegación -->
+    <ul class="flex flex-wrap justify-center md:justify-start space-x-4">
+      {navLinks.map((link) => (
+        <li>
+          <a href={link.href} class="hover:text-green-400 transition">
+            {link.name}
+          </a>
+        </li>
+      ))}
+    </ul>
+
+    <!-- Redes Sociales -->
+    <div class="flex space-x-4 mt-6 md:mt-0">
+      {socialLinks.map(({ name, href, icon: Icon }) => (
+        <a
+          href={href}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="flex items-center justify-center w-10 h-10 rounded-full bg-white text-black hover:bg-green-400 hover:text-black transition duration-300"
+        >
+          <Icon className="w-6 h-6" />
+        </a>
+      ))}
+    </div>
+  </div>
+
+  <div class="text-center text-gray-400 mt-6 text-sm">
+    &copy; {year} PortafolioDhiRenxo. Todos los derechos reservados.
+  </div>
+</footer>

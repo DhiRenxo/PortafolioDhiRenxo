@@ -1,0 +1,153 @@
+---
+import DefaultLayout from "../layouts/DefaultLayout.astro";
+import Hero from "../components/sections/Hero.astro";
+import AboutMe from "../components/sections/AboutMe.astro";
+import ProjectsList from "../components/sections/ProjectsList.astro";
+import ContactForm from "../components/sections/ContactForm.astro";
+import CommentsSection from "../components/sections/CommentsSection.astro";
+
+import { getAllComments } from "../services/commentsservice";
+import type { Comment } from "../types/commenttypes";
+
+import { getProjects } from "../services/projectsservice";
+import type { Project } from "../types/projecttypes";
+
+const allProjects: Project[] = await getProjects();
+const projectsPerPage = 3;
+let currentIndex = 0;
+
+function getPaginatedProjects(): Project[] {
+  return allProjects.slice(currentIndex, currentIndex + projectsPerPage);
+}
+
+const allComments: Comment[] = await getAllComments();
+const commentsPerPage = 3;
+let currentPage = 0;
+
+function getPaginatedComments(): Comment[] {
+  const start = currentPage * commentsPerPage;
+  return allComments.slice(start, start + commentsPerPage);
+}
+---
+
+<DefaultLayout>
+  <Hero />
+  <AboutMe />
+  <ProjectsList />
+  <ContactForm />
+  <CommentsSection />
+  <script >
+    
+    import { getProjects } from "../services/projectsservice";
+    import type { Project } from "../types/projecttypes";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      let projects: Project[] = [];
+      let currentIndex = 0;
+      const projectsPerPage = 3;
+      const projectsContainer = document.getElementById("projects-container");
+  
+      async function fetchProjects() {
+        try {
+          projects = await getProjects();
+          renderProjects();
+        } catch (error) {
+          console.error("Error al obtener los proyectos:", error);
+        }
+      }
+  
+      function renderProjects() {
+        if (!projectsContainer) return;
+        projectsContainer.innerHTML = "";
+        const paginatedProjects = projects.slice(currentIndex, currentIndex + projectsPerPage);
+        
+        paginatedProjects.forEach((project) => {
+          const projectCard = document.createElement("div");
+          projectCard.className = "project-card";
+          projectCard.innerHTML = `
+            <img src="${project.image_url}" alt="${project.title}" class="w-full h-48 object-cover" />
+            <div class="p-6">
+              <h3 class="text-2xl font-semibold">${project.title}</h3>
+              <p class="text-gray-300 mt-2">${project.description}</p>
+              <div class="flex flex-wrap gap-2 mt-4">
+                ${project.tech_stack.map((tech) => `<span class="px-3 py-1 text-sm bg-green-400 text-black rounded-full">${tech}</span>`).join('')}
+              </div>
+              <a href="${project.demo_url}" target="_blank" class="mt-4 inline-block text-green-400 hover:text-green-300 transition">
+                Ver Proyecto →
+              </a>
+            </div>
+          `;
+          projectsContainer.appendChild(projectCard);
+        });
+      }
+  
+      function updateProjects() {
+        currentIndex += projectsPerPage;
+        if (currentIndex >= projects.length) {
+          currentIndex = 0;
+        }
+        renderProjects();
+      }
+  
+      await fetchProjects();
+      setInterval(updateProjects, 60000); // Cambia cada minuto
+    });
+
+    import { getAllComments } from "../services/commentsservice";
+  import type { Comment } from "../types/commenttypes";
+
+  document.addEventListener("DOMContentLoaded", async () => {
+    let comments: Comment[] = [];
+    let currentIndex = 0;
+    const commentsPerPage = 3;
+    const commentsContainer = document.getElementById("comments-container");
+
+    async function fetchComments() {
+      try {
+        console.log("Obteniendo comentarios desde la API...");
+        comments = await getAllComments();
+        console.log("Comentarios obtenidos:", comments);
+        renderComments();
+      } catch (error) {
+        console.error("Error al obtener los comentarios:", error);
+      }
+    }
+
+    function renderComments() {
+      if (!commentsContainer) {
+        console.warn("No se encontró el contenedor de comentarios.");
+        return;
+      }
+
+      console.log("Renderizando comentarios desde índice:", currentIndex);
+      commentsContainer.innerHTML = "";
+      const paginatedComments = comments.slice(currentIndex, currentIndex + commentsPerPage);
+      console.log("Comentarios actuales mostrados:", paginatedComments);
+
+      paginatedComments.forEach((comment) => {
+        const commentCard = document.createElement("div");
+        commentCard.className = "bg-gray-700 p-4 rounded-md shadow";
+        commentCard.innerHTML = `
+          <p class="text-gray-300">"${comment.content}"</p>
+          <p class="text-gray-400 text-sm mt-2">- ${comment.name}</p>
+        `;
+        commentsContainer.appendChild(commentCard);
+      });
+    }
+
+    function updateComments() {
+      console.log("Actualizando comentarios...");
+      currentIndex += commentsPerPage;
+      if (currentIndex >= comments.length) {
+        console.log("Reiniciando índice de comentarios.");
+        currentIndex = 0;
+      }
+      renderComments();
+    }
+
+    await fetchComments();
+    setInterval(updateComments, 60000); // Cambia cada minuto
+  });
+  </script>
+  
+</DefaultLayout>

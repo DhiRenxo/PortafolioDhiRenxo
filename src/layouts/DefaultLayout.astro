@@ -1,0 +1,9 @@
+---
+import MainLayout from "../components/layout/MainLayout.astro";
+
+const { title = "PortafolioDhiRenxo" } = Astro.props;
+---
+
+<MainLayout {title}>
+  <slot />
+</MainLayout>

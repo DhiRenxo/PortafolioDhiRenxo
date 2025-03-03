@@ -1,0 +1,163 @@
+---
+import DefaultLayout from "../layouts/DefaultLayout.astro";
+import { getAllComments, createComment } from "../services/commentsservice";
+import type { Comment } from "../types/commenttypes";
+
+const allComments: Comment[] = await getAllComments();
+const commentsPerPage = 3;
+const totalPages = Math.ceil(allComments.length / commentsPerPage);
+---
+
+<DefaultLayout title="Comentarios">
+  <section class="p-6">
+    <h1 class="text-3xl font-bold text-green-400 text-center">Comentarios</h1>
+    <p class="text-lg text-gray-300 mt-2 text-center">Comparte tu opinión o revisa los comentarios de otros usuarios.</p>
+
+    <!-- Spinner de carga -->
+    <div id="loading-spinner" class="flex justify-center mt-6">
+      <div class="animate-spin rounded-full h-12 w-12 border-t-4 border-green-400"></div>
+    </div>
+
+    <!-- Contenedor de comentarios -->
+    <div id="comments-container" class="mt-6 space-y-4 hidden" data-comments={`${JSON.stringify(allComments)}`}></div>
+
+    <!-- Controles de paginación -->
+    <div id="pagination-controls" class="mt-6 flex justify-center gap-4 hidden">
+      <button id="prevPage" class="px-4 py-2 bg-gray-700 text-white rounded-lg disabled:opacity-50">⬅️ Anterior</button>
+      <span id="pageInfo" class="text-gray-300 text-lg"></span>
+      <button id="nextPage" class="px-4 py-2 bg-gray-700 text-white rounded-lg disabled:opacity-50">Siguiente ➡️</button>
+    </div>
+
+    <!-- Formulario para agregar comentario -->
+    <form id="comment-form" class="mt-8 p-4 bg-gray-800 rounded-lg shadow-lg">
+      <h2 class="text-lg font-semibold text-white">Agregar un comentario</h2>
+      <input id="name" type="text" placeholder="Tu nombre" class="w-full p-2 mt-2 bg-gray-700 text-white rounded-lg" required />
+      <input id="email" type="email" placeholder="Tu email" class="w-full p-2 mt-2 bg-gray-700 text-white rounded-lg" required />
+      <textarea id="content" placeholder="Tu comentario" class="w-full p-2 mt-2 bg-gray-700 text-white rounded-lg" required></textarea>
+      <button type="submit" class="mt-4 px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600">Enviar</button>
+    </form>
+  </section>
+
+  <script>
+    import { getAllComments, createComment } from "../services/commentsservice";
+    import type { Comment } from "../types/commenttypes";
+  
+    document.addEventListener("DOMContentLoaded", async () => {
+      const commentsContainer = document.getElementById("comments-container");
+      const prevButton = document.getElementById("prevPage") as HTMLButtonElement | null;
+      const nextButton = document.getElementById("nextPage") as HTMLButtonElement | null;
+      const pageInfo = document.getElementById("pageInfo");
+      const paginationControls = document.getElementById("pagination-controls");
+      const loadingSpinner = document.getElementById("loading-spinner");
+      const commentForm = document.getElementById("comment-form") as HTMLFormElement | null;
+      const modal = document.getElementById("modal");
+      const modalContent = document.getElementById("modal-content");
+      const closeModal = document.getElementById("close-modal");
+  
+      let currentPage = 1;
+      const commentsPerPage = 3;
+      let comments: Comment[] = [];
+  
+      try {
+        comments = JSON.parse(commentsContainer?.dataset?.comments || "[]");
+        console.log("Comentarios obtenidos:", comments);
+      } catch (error) {
+        console.error("Error al parsear comentarios:", error);
+      }
+  
+      function calculateTotalPages() {
+        return Math.ceil(comments.length / commentsPerPage) || 1;
+      }
+  
+      function renderComments() {
+        if (!commentsContainer) return;
+        commentsContainer.innerHTML = "";
+        const totalPages = calculateTotalPages();
+        const start = (currentPage - 1) * commentsPerPage;
+        const paginatedComments = comments.slice(start, start + commentsPerPage);
+  
+        paginatedComments.forEach((comment) => {
+          const commentCard = document.createElement("div");
+          commentCard.className = "bg-gray-900 p-4 rounded-lg shadow-md border border-gray-800";
+          commentCard.innerHTML = `
+            <h3 class="text-lg font-semibold text-green-400">${comment.name}</h3>
+            <p class="text-sm text-gray-400">${comment.email}</p>
+            <p class="text-gray-300 mt-2">${comment.content}</p>
+            <small class="text-gray-500">${new Date(comment.created_at).toLocaleDateString()}</small>
+          `;
+          commentsContainer.appendChild(commentCard);
+        });
+  
+        if (pageInfo) {
+          pageInfo.textContent = `Página ${currentPage} de ${totalPages}`;
+        }
+        if (prevButton) {
+          prevButton.disabled = currentPage === 1;
+        }
+        if (nextButton) {
+          nextButton.disabled = currentPage === totalPages;
+        }
+      }
+  
+      prevButton?.addEventListener("click", () => {
+        if (currentPage > 1) {
+          currentPage--;
+          renderComments();
+        }
+      });
+  
+      nextButton?.addEventListener("click", () => {
+        if (currentPage < calculateTotalPages()) {
+          currentPage++;
+          renderComments();
+        }
+      });
+  
+      commentForm?.addEventListener("submit", async (event) => {
+        event.preventDefault();
+        const name = (document.getElementById("name") as HTMLInputElement | null)?.value.trim();
+        const email = (document.getElementById("email") as HTMLInputElement | null)?.value.trim();
+        const content = (document.getElementById("content") as HTMLTextAreaElement | null)?.value.trim();
+  
+        if (!name || !email || !content) {
+          alert("Todos los campos son obligatorios.");
+          return;
+        }
+  
+        try {
+          const newComment = await createComment({ name, email, content });
+          console.log("Comentario creado:", newComment);
+  
+          comments.unshift(newComment);
+          currentPage = 1;
+          renderComments();
+  
+          if (modalContent && modal) {
+            modalContent.innerHTML = `
+              <p><strong>Nombre:</strong> ${newComment.name}</p>
+              <p><strong>Email:</strong> ${newComment.email}</p>
+              <p><strong>Comentario:</strong> ${newComment.content}</p>
+            `;
+            modal.classList.remove("hidden");
+          }
+  
+          commentForm.reset();
+        } catch (error) {
+          console.error("Error al enviar comentario:", error);
+        }
+      });
+  
+      closeModal?.addEventListener("click", () => {
+        modal?.classList.add("hidden");
+      });
+  
+      setTimeout(() => {
+        if (loadingSpinner) loadingSpinner.style.display = "none";
+        commentsContainer?.classList.remove("hidden");
+        paginationControls?.classList.remove("hidden");
+        renderComments();
+      }, 1500);
+    });
+  </script>
+
+</DefaultLayout>
