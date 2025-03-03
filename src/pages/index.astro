@@ -104,9 +104,7 @@ function getPaginatedComments(): Comment[] {
 
     async function fetchComments() {
       try {
-        console.log("Obteniendo comentarios desde la API...");
         comments = await getAllComments();
-        console.log("Comentarios obtenidos:", comments);
         renderComments();
       } catch (error) {
         console.error("Error al obtener los comentarios:", error);
@@ -119,10 +117,8 @@ function getPaginatedComments(): Comment[] {
         return;
       }
 
-      console.log("Renderizando comentarios desde índice:", currentIndex);
       commentsContainer.innerHTML = "";
       const paginatedComments = comments.slice(currentIndex, currentIndex + commentsPerPage);
-      console.log("Comentarios actuales mostrados:", paginatedComments);
 
       paginatedComments.forEach((comment) => {
         const commentCard = document.createElement("div");
@@ -136,10 +132,8 @@ function getPaginatedComments(): Comment[] {
     }
 
     function updateComments() {
-      console.log("Actualizando comentarios...");
       currentIndex += commentsPerPage;
       if (currentIndex >= comments.length) {
-        console.log("Reiniciando índice de comentarios.");
         currentIndex = 0;
       }
       renderComments();
